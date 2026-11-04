@@ -1,0 +1,32 @@
+# ===== Java / Maven =====
+target/
+*.war
+*.class
+*.log
+logs/
+dependency-reduced-pom.xml
+
+# ===== IDE =====
+.idea/
+.smarttomcat/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+out/
+
+# ===== 运行产物 =====
+uploads/
+*.pid
+*.tmp
+
+# ===== 系统 =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== 本地敏感配置（模板见 src/main/resources/jdbc.properties）=====
+src/main/resources/jdbc.properties.local

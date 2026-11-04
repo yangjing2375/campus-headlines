@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campus.mapper.CommentLikeMapper">
+
+    <select id="selectLikedCommentIds" resultType="java.lang.Long">
+        SELECT comment_id FROM comment_like
+        WHERE user_id = #{userId}
+        <if test="commentIds != null and commentIds.size() > 0">
+            AND comment_id IN
+            <foreach collection="commentIds" item="cid" open="(" separator="," close=")">#{cid}</foreach>
+        </if>
+    </select>
+</mapper>

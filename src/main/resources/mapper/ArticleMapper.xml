@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campus.mapper.ArticleMapper">
+
+    <resultMap id="ArticleMap" type="com.campus.entity.Article">
+        <id     column="id"              property="id"/>
+        <result column="title"           property="title"/>
+        <result column="summary"         property="summary"/>
+        <result column="content"         property="content"/>
+        <result column="cover"           property="cover"/>
+        <result column="video_url"       property="videoUrl"/>
+        <result column="channel_id"      property="channelId"/>
+        <result column="topic_id"        property="topicId"/>
+        <result column="author_id"       property="authorId"/>
+        <result column="source"          property="source"/>
+        <result column="status"          property="status"/>
+        <result column="reject_reason"   property="rejectReason"/>
+        <result column="view_count"      property="viewCount"/>
+        <result column="like_count"      property="likeCount"/>
+        <result column="favorite_count"  property="favoriteCount"/>
+        <result column="comment_count"   property="commentCount"/>
+        <result column="is_top"          property="isTop"/>
+        <result column="is_urgent"       property="isUrgent"/>
+        <result column="publish_time"    property="publishTime"/>
+        <result column="create_time"     property="createTime"/>
+        <result column="update_time"     property="updateTime"/>
+        <result column="channel_name"    property="channelName"/>
+        <result column="topic_name"      property="topicName"/>
+        <result column="author_name"     property="authorName"/>
+        <result column="author_college"  property="authorCollege"/>
+    </resultMap>
+
+    <!-- 详情查询（关联频道名、话题名、作者昵称、院系） -->
+    <select id="selectDetail" resultMap="ArticleMap">
+        SELECT a.*, c.name AS channel_name, t.title AS topic_name,
+               u.nickname AS author_name, u.college AS author_college
+        FROM article a
+        LEFT JOIN channel c ON a.channel_id = c.id
+        LEFT JOIN news_topic t ON a.topic_id = t.id
+        LEFT JOIN sys_user u ON a.author_id = u.id
+        WHERE a.id = #{id}
+    </select>
+
+    <!-- 自媒体人个人文章多条件筛选分页（动态SQL：状态+频道+时间+关键词） -->
+    <select id="selectMinePage" resultMap="ArticleMap">
+        SELECT a.*, c.name AS channel_name, t.title AS topic_name
+        FROM article a
+        LEFT JOIN channel c ON a.channel_id = c.id
+        LEFT JOIN news_topic t ON a.topic_id = t.id
+        <where>
+            a.author_id = #{authorId}
+            <if test="status != null">
+                AND a.status = #{status}
+            </if>
+            <if test="channelId != null">
+                AND a.channel_id = #{channelId}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                AND a.create_time &gt;= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                AND a.create_time &lt;= CONCAT(#{endDate}, ' 23:59:59')
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND a.title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+        ORDER BY a.update_time DESC
+    </select>
+
+    <!-- 用户端已发布文章分页（按频道+关键词） -->
+    <select id="selectPublishedPage" resultMap="ArticleMap">
+        SELECT a.*, c.name AS channel_name, t.title AS topic_name, u.nickname AS author_name
+        FROM article a
+        LEFT JOIN channel c ON a.channel_id = c.id
+        LEFT JOIN news_topic t ON a.topic_id = t.id
+        LEFT JOIN sys_user u ON a.author_id = u.id
+        <where>
+            a.status = 2
+            <if test="channelId != null">
+                AND a.channel_id = #{channelId}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND a.title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+        ORDER BY a.is_top DESC, a.publish_time DESC
+    </select>
+
+    <!-- 管理端全站文章多条件分页 -->
+    <select id="selectAdminPage" resultMap="ArticleMap">
+        SELECT a.*, c.name AS channel_name, t.title AS topic_name, u.nickname AS author_name
+        FROM article a
+        LEFT JOIN channel c ON a.channel_id = c.id
+        LEFT JOIN news_topic t ON a.topic_id = t.id
+        LEFT JOIN sys_user u ON a.author_id = u.id
+        <where>
+            <if test="status != null">
+                AND a.status = #{status}
+            </if>
+            <if test="channelId != null">
+                AND a.channel_id = #{channelId}
+            </if>
+            <if test="authorId != null">
+                AND a.author_id = #{authorId}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND a.title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+        ORDER BY a.create_time DESC
+    </select>
+
+    <!-- 话题下的已发布文章分页 -->
+    <select id="selectPageByTopic" resultMap="ArticleMap">
+        SELECT a.*, c.name AS channel_name, t.title AS topic_name, u.nickname AS author_name
+        FROM article a
+        LEFT JOIN channel c ON a.channel_id = c.id
+        LEFT JOIN news_topic t ON a.topic_id = t.id
+        LEFT JOIN sys_user u ON a.author_id = u.id
+        WHERE a.status = 2 AND a.topic_id = #{topicId}
+        <if test="keyword != null and keyword != ''">
+            AND a.title LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        ORDER BY a.is_top DESC, a.publish_time DESC
+    </select>
+</mapper>

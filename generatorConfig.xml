@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<!--
+  MyBatis 逆向工程配置（对应考核方案技术点"逆向工程"）
+  执行方式（在 campus-headlines 目录下）：
+      mvn mybatis-generator:generate
+  说明：生成结果统一放入 generated 子包，避免覆盖项目中手写的实体、Mapper 与 XML。
+-->
+<generatorConfiguration>
+    <context id="campusHeadlines" targetRuntime="MyBatis3">
+        <commentGenerator>
+            <property name="suppressDate" value="true"/>
+            <property name="suppressAllComments" value="false"/>
+        </commentGenerator>
+
+        <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+                        connectionURL="jdbc:mysql://localhost:3306/campus_headlines?useUnicode=true&amp;characterEncoding=utf8&amp;useSSL=false"
+                        userId="root"
+                        password="root"/>
+
+        <javaTypeResolver>
+            <property name="forceBigDecimals" value="false"/>
+        </javaTypeResolver>
+
+        <!-- 实体类生成位置 -->
+        <javaModelGenerator targetPackage="com.campus.entity.generated"
+                            targetProject="src/main/java">
+            <property name="enableSubPackages" value="false"/>
+            <property name="trimStrings" value="true"/>
+        </javaModelGenerator>
+
+        <!-- Mapper XML 生成位置 -->
+        <sqlMapGenerator targetPackage="mapper.generated"
+                         targetProject="src/main/resources">
+            <property name="enableSubPackages" value="false"/>
+        </sqlMapGenerator>
+
+        <!-- Mapper 接口生成位置 -->
+        <javaClientGenerator type="XMLMAPPER"
+                             targetPackage="com.campus.mapper.generated"
+                             targetProject="src/main/java">
+            <property name="enableSubPackages" value="false"/>
+        </javaClientGenerator>
+
+        <!-- 核心数据表 -->
+        <table tableName="sys_user"        domainObjectName="SysUserGen"
+               enableCountByExample="false" enableUpdateByExample="false"
+               enableDeleteByExample="false" enableSelectByExample="false"
+               selectByExampleQueryId="false"/>
+        <table tableName="news_article"    domainObjectName="NewsArticleGen"
+               enableCountByExample="false" enableUpdateByExample="false"
+               enableDeleteByExample="false" enableSelectByExample="false"
+               selectByExampleQueryId="false"/>
+        <table tableName="news_draft"      domainObjectName="NewsDraftGen"
+               enableCountByExample="false" enableUpdateByExample="false"
+               enableDeleteByExample="false" enableSelectByExample="false"
+               selectByExampleQueryId="false"/>
+        <table tableName="news_category"   domainObjectName="NewsCategoryGen"
+               enableCountByExample="false" enableUpdateByExample="false"
+               enableDeleteByExample="false" enableSelectByExample="false"
+               selectByExampleQueryId="false"/>
+        <table tableName="news_attachment" domainObjectName="NewsAttachmentGen"
+               enableCountByExample="false" enableUpdateByExample="false"
+               enableDeleteByExample="false" enableSelectByExample="false"
+               selectByExampleQueryId="false"/>
+        <table tableName="news_comment"    domainObjectName="NewsCommentGen"
+               enableCountByExample="false" enableUpdateByExample="false"
+               enableDeleteByExample="false" enableSelectByExample="false"
+               selectByExampleQueryId="false"/>
+    </context>
+</generatorConfiguration>

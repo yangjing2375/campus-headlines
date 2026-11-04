@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ============ Spring 根容器配置 ============ -->
+<!-- 对应教材：第1-4章 Spring IoC / Bean / AOP / 声明式事务 -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:mybatis-plus="http://baomidou.com/schema/mybatis-plus"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd
+           http://www.springframework.org/schema/tx
+           http://www.springframework.org/schema/tx/spring-tx.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop.xsd
+           http://baomidou.com/schema/mybatis-plus
+           http://baomidou.com/schema/mybatis-plus/mybatis-plus.xsd">
+
+    <!-- ========== 1. 扫描 Service 层（IoC 注解注入） ========== -->
+    <!-- Controller 由 springmvc.xml 单独扫描，实现父子容器隔离 -->
+    <context:component-scan base-package="com.campus">
+        <context:exclude-filter type="annotation"
+                                expression="org.springframework.stereotype.Controller"/>
+        <context:exclude-filter type="annotation"
+                                expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+    </context:component-scan>
+
+    <!-- ========== 2. 加载数据库与 Redis 属性文件 ========== -->
+    <context:property-placeholder location="classpath:jdbc.properties,classpath:redis.properties"/>
+
+    <!-- ========== 3. Druid 数据源（连接池） ========== -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+          init-method="init" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="url"            value="${jdbc.url}"/>
+        <property name="username"       value="${jdbc.username}"/>
+        <property name="password"       value="${jdbc.password}"/>
+        <property name="initialSize"    value="${jdbc.initialSize}"/>
+        <property name="maxActive"      value="${jdbc.maxActive}"/>
+        <property name="minIdle"        value="${jdbc.minIdle}"/>
+    </bean>
+
+    <!-- ========== 4. MyBatis-Plus SqlSessionFactory ========== -->
+    <!-- 对应教材第12-13章 MyBatis-Plus 快速入门 + SSM整合 -->
+    <bean id="sqlSessionFactory" class="com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <!-- MyBatis 全局配置（MyBatis-Plus 专用 Configuration 类型） -->
+        <property name="configuration">
+            <bean class="com.baomidou.mybatisplus.core.MybatisConfiguration">
+                <property name="mapUnderscoreToCamelCase" value="true"/>
+                <property name="logImpl" value="org.apache.ibatis.logging.slf4j.Slf4jImpl"/>
+            </bean>
+        </property>
+        <!-- MyBatis-Plus 全局策略 -->
+        <property name="globalConfig">
+            <bean class="com.baomidou.mybatisplus.core.config.GlobalConfig">
+                <property name="dbConfig">
+                    <bean class="com.baomidou.mybatisplus.core.config.GlobalConfig$DbConfig">
+                        <property name="idType" value="AUTO"/>
+                        <property name="tableUnderline" value="true"/>
+                        <property name="capitalMode" value="false"/>
+                    </bean>
+                </property>
+            </bean>
+        </property>
+        <!-- 扫描 XML 映射文件（MyBatis 动态 SQL 所在位置） -->
+        <property name="mapperLocations" value="classpath:mapper/*.xml"/>
+        <!-- 类型别名包 -->
+        <property name="typeAliasesPackage" value="com.campus.entity"/>
+        <!-- MyBatis-Plus 分页插件（MybatisPlusInterceptor 包装内部拦截器） -->
+        <property name="plugins">
+            <array>
+                <bean class="com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor">
+                    <property name="interceptors">
+                        <list>
+                            <bean class="com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor"/>
+                        </list>
+                    </property>
+                </bean>
+            </array>
+        </property>
+    </bean>
+
+    <!-- ========== 5. MyBatis / MyBatis-Plus Mapper 扫描 ========== -->
+    <!-- 对应教材第13.1节 SSM 框架整合 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.campus.mapper"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+
+    <!-- ========== 6. 声明式事务管理（对应教材第4章 Spring 事务管理） ========== -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+    <!-- ========== 7. 启用 AOP（对应教材第3章 Spring AOP） ========== -->
+    <!-- 扫描 com.campus.aspect 包下的 @Aspect 切面类 -->
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+
+    <!-- ========== 8. Redis 配置（Token 存储 / 登录态管理，必做） ========== -->
+    <!-- Jedis 连接池配置 -->
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxIdle"     value="${redis.maxIdle}"/>
+        <property name="maxTotal"    value="${redis.maxTotal}"/>
+        <property name="minIdle"     value="${redis.minIdle}"/>
+    </bean>
+
+    <!-- Jedis 连接工厂 -->
+    <bean id="jedisConnectionFactory"
+          class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+        <property name="hostName"      value="${redis.host}"/>
+        <property name="port"          value="${redis.port}"/>
+        <property name="password"      value="${redis.password}"/>
+        <property name="database"      value="${redis.database}"/>
+        <property name="timeout"       value="${redis.timeout}"/>
+        <property name="poolConfig"    ref="jedisPoolConfig"/>
+    </bean>
+
+    <!-- RedisTemplate：统一操作 Redis 的模板 -->
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+        <property name="connectionFactory" ref="jedisConnectionFactory"/>
+        <property name="keySerializer">
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+        </property>
+        <property name="valueSerializer">
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+        </property>
+        <property name="hashKeySerializer">
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+        </property>
+        <property name="hashValueSerializer">
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+        </property>
+    </bean>
+
+</beans>

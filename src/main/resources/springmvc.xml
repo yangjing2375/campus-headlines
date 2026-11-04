@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ============ SpringMVC 配置 ============ -->
+<!-- 对应教材：第5-7章 SpringMVC 请求映射/数据绑定/拦截器/文件上传 -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd
+           http://www.springframework.org/schema/mvc
+           http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <!-- ========== 1. 仅扫描 Controller 层（父子容器隔离） ========== -->
+    <context:component-scan base-package="com.campus.controller"
+                            use-default-filters="false">
+        <context:include-filter type="annotation"
+                                expression="org.springframework.stereotype.Controller"/>
+        <context:include-filter type="annotation"
+                                expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+    </context:component-scan>
+
+    <!-- ========== 2. 开启注解驱动（替代 DefaultAnnotationHandlerMapping + AnnotationMethodHandlerAdapter） ========== -->
+    <!-- 同时提供：JSON 序列化、响应式、消息转换器等 -->
+    <mvc:annotation-driven>
+        <mvc:message-converters register-defaults="true">
+            <!-- Jackson JSON 转换器 -->
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                <property name="defaultCharset" value="UTF-8"/>
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>application/json</value>
+                        <value>text/plain;charset=UTF-8</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+    <!-- ========== 3. 视图解析器（JSP） ========== -->
+    <!-- 对应教材第5章 SpringMVC 视图解析 -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/views/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!-- ========== 4. 静态资源放行 ========== -->
+    <mvc:resources mapping="/static/**" location="/static/"/>
+    <mvc:resources mapping="/uploads/**" location="/static/uploads/"/>
+    <mvc:default-servlet-handler/>
+
+    <!-- ========== 5. 文件上传解析器（对应教材第7.3节 文件上传） ========== -->
+    <bean id="multipartResolver"
+          class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="52428800"/>       <!-- 50MB -->
+        <property name="maxInMemorySize" value="4096"/>         <!-- 4KB -->
+        <property name="defaultEncoding" value="UTF-8"/>
+        <!-- 临时目录交由容器（Tomcat）默认 temp 目录处理，避免 Windows 下路径不可创建 -->
+    </bean>
+
+    <!-- ========== 6. 拦截器配置（对应教材第7.2节 拦截器） ========== -->
+    <mvc:interceptors>
+        <!-- 登录拦截器：未登录不能访问 /editor/** 和 /admin/** -->
+        <mvc:interceptor>
+            <mvc:mapping path="/editor/**"/>
+            <mvc:mapping path="/admin/**"/>
+            <mvc:mapping path="/user/**"/>
+            <mvc:exclude-mapping path="/user/login"/>
+            <mvc:exclude-mapping path="/user/doLogin"/>
+            <mvc:exclude-mapping path="/user/captcha"/>
+            <mvc:exclude-mapping path="/user/register"/>
+            <mvc:exclude-mapping path="/user/doRegister"/>
+            <mvc:exclude-mapping path="/user/uploadAvatar"/>
+            <bean class="com.campus.interceptor.LoginInterceptor"/>
+        </mvc:interceptor>
+
+        <!-- 角色权限拦截器：管理后台仅 ADMIN 可访问 -->
+        <mvc:interceptor>
+            <mvc:mapping path="/admin/**"/>
+            <bean class="com.campus.interceptor.RoleInterceptor">
+                <property name="requiredRoles" value="ADMIN"/>
+            </bean>
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/editor/**"/>
+            <bean class="com.campus.interceptor.RoleInterceptor">
+                <property name="requiredRoles" value="MEDIA"/>
+            </bean>
+        </mvc:interceptor>
+
+        <!-- 接口访问日志拦截器：记录每个 /api 请求的方法、URI、状态与耗时 -->
+        <mvc:interceptor>
+            <mvc:mapping path="/api/**"/>
+            <bean class="com.campus.interceptor.ApiLogInterceptor"/>
+        </mvc:interceptor>
+
+        <!-- JWT Token 鉴权：自媒体端只允许 MEDIA -->
+        <mvc:interceptor>
+            <mvc:mapping path="/api/media/**"/>
+            <bean class="com.campus.interceptor.TokenInterceptor">
+                <property name="requiredRoles" value="MEDIA"/>
+            </bean>
+        </mvc:interceptor>
+
+        <!-- JWT Token 鉴权：管理端仅允许 ADMIN -->
+        <mvc:interceptor>
+            <mvc:mapping path="/api/admin/**"/>
+            <bean class="com.campus.interceptor.TokenInterceptor">
+                <property name="requiredRoles" value="ADMIN"/>
+            </bean>
+        </mvc:interceptor>
+
+        <!-- JWT Token 鉴权：用户端接口（游客可浏览，互动需登录） -->
+        <mvc:interceptor>
+            <mvc:mapping path="/api/user/**"/>
+            <bean class="com.campus.interceptor.TokenInterceptor">
+                <property name="optional" value="true"/>
+            </bean>
+        </mvc:interceptor>
+
+        <!-- JWT Token 鉴权：退出登录、获取用户信息需携带 Token -->
+        <mvc:interceptor>
+            <mvc:mapping path="/api/auth/logout"/>
+            <mvc:mapping path="/api/auth/userinfo"/>
+            <bean class="com.campus.interceptor.TokenInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+</beans>

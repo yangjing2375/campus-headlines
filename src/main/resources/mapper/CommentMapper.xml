@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campus.mapper.CommentMapper">
+
+    <resultMap id="CommentMap" type="com.campus.entity.Comment">
+        <id     column="id"            property="id"/>
+        <result column="article_id"    property="articleId"/>
+        <result column="user_id"       property="userId"/>
+        <result column="content"       property="content"/>
+        <result column="parent_id"     property="parentId"/>
+        <result column="reply_user_id" property="replyUserId"/>
+        <result column="like_count"    property="likeCount"/>
+        <result column="status"        property="status"/>
+        <result column="create_time"   property="createTime"/>
+        <result column="user_name"     property="userName"/>
+        <result column="article_title" property="articleTitle"/>
+        <result column="reply_user_name" property="replyUserName"/>
+    </resultMap>
+
+    <select id="selectByArticleId" resultMap="CommentMap">
+        SELECT c.*, u.nickname AS user_name, ru.nickname AS reply_user_name
+        FROM comment c
+        LEFT JOIN sys_user u ON c.user_id = u.id
+        LEFT JOIN sys_user ru ON c.reply_user_id = ru.id
+        WHERE c.article_id = #{articleId} AND c.status = 1
+        ORDER BY c.create_time DESC
+    </select>
+
+    <select id="selectAdminPage" resultMap="CommentMap">
+        SELECT c.*, u.nickname AS user_name, a.title AS article_title
+        FROM comment c
+        LEFT JOIN sys_user u ON c.user_id = u.id
+        LEFT JOIN article a ON c.article_id = a.id
+        <where>
+            <if test="keyword != null and keyword != ''">
+                c.content LIKE CONCAT('%', #{keyword}, '%')
+                OR a.title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+        ORDER BY c.create_time DESC
+    </select>
+</mapper>

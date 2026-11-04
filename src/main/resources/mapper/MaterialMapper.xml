@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campus.mapper.MaterialMapper">
+
+    <select id="selectByUserPage" resultType="com.campus.entity.Material">
+        SELECT * FROM material
+        <where>
+            user_id = #{userId}
+            <if test="type != null and type != ''">
+                AND type = #{type}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByUserAndMd5" resultType="com.campus.entity.Material">
+        SELECT * FROM material WHERE user_id = #{userId} AND md5 = #{md5} LIMIT 1
+    </select>
+</mapper>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campus.mapper.TopicMapper">
+
+    <resultMap id="TopicMap" type="com.campus.entity.Topic">
+        <id     column="id"              property="id"/>
+        <result column="title"           property="title"/>
+        <result column="description"     property="description"/>
+        <result column="cover"           property="cover"/>
+        <result column="creator_id"      property="creatorId"/>
+        <result column="status"          property="status"/>
+        <result column="is_hot"          property="isHot"/>
+        <result column="reject_reason"   property="rejectReason"/>
+        <result column="create_time"     property="createTime"/>
+        <result column="update_time"     property="updateTime"/>
+        <result column="creator_name"    property="creatorName"/>
+        <result column="article_count"   property="articleCount"/>
+        <result column="follower_count"  property="followerCount"/>
+    </resultMap>
+
+    <!-- 话题基础查询：创建人昵称 + 已发布文章数 + 关注人数（动态统计，不存冗余计数） -->
+    <sql id="topicSelect">
+        SELECT t.*,
+               COALESCE(u.nickname, u.username) AS creator_name,
+               (SELECT COUNT(*) FROM article a WHERE a.topic_id = t.id AND a.status = 2) AS article_count,
+               (SELECT COUNT(*) FROM news_topic_follow f WHERE f.topic_id = t.id) AS follower_count
+        FROM news_topic t
+        LEFT JOIN sys_user u ON t.creator_id = u.id
+    </sql>
+
+    <!-- 话题分页（状态 + 创建人 + 关键词 + 仅热门） -->
+    <select id="selectTopicPage" resultMap="TopicMap">
+        <include refid="topicSelect"/>
+        <where>
+            <if test="status != null">
+                AND t.status = #{status}
+            </if>
+            <if test="creatorId != null">
+                AND t.creator_id = #{creatorId}
+            </if>
+            <if test="hotOnly != null">
+                AND t.is_hot = 1
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (t.title LIKE CONCAT('%', #{keyword}, '%')
+                     OR t.description LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+        ORDER BY t.is_hot DESC, t.create_time DESC
+    </select>
+
+    <!-- 话题详情 -->
+    <select id="selectTopicDetail" resultMap="TopicMap">
+        <include refid="topicSelect"/>
+        WHERE t.id = #{id}
+    </select>
+</mapper>

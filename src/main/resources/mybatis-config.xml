@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ============ MyBatis 核心配置 ============ -->
+<!-- 对应教材第8章 MyBatis 快速入门 -->
+<!DOCTYPE configuration
+    PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <settings>
+        <!-- 驼峰命名自动映射 -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <!-- 延迟加载 -->
+        <setting name="lazyLoadingEnabled" value="true"/>
+        <!-- 日志输出 -->
+        <setting name="logImpl" value="SLF4J"/>
+        <!-- 二级缓存 -->
+        <setting name="cacheEnabled" value="false"/>
+    </settings>
+
+    <typeAliases>
+        <package name="com.campus.entity"/>
+    </typeAliases>
+</configuration>
