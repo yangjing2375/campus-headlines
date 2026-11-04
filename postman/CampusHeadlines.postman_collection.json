@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "de2537b3-5528-414a-a239-4a7d6c6e3818",
     "name": "校园头条 Campus Headlines · 接口测试集合",
-    "description": "覆盖 认证 / 用户端 / 自媒体端 / 管理端 4 类共 44 个请求，登录请求自动把 Token 写入 collectionVariables；异常用例覆盖 BUG-01（越权访问）、BUG-02（分页越界）、BUG-03（频道删除）回归。\n\n运行方式：先执行 01 认证 三个登录请求，再按目录顺序运行（或直接 Collection Runner 顺序执行）。",
+    "description": "覆盖 认证 / 用户端 / 自媒体端 / 管理端 4 类共 46 个请求，登录请求自动把 Token 写入 collectionVariables；异常用例覆盖 BUG-01（越权访问）、BUG-02（分页越界）、BUG-03（频道删除）回归。\n\n运行方式：先执行 01 认证 三个登录请求，再按目录顺序运行（或直接 Collection Runner 顺序执行）。",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -28,6 +28,7 @@
                   "    pm.expect(j.data.user.password).to.be.null;",
                   "});",
                   "pm.collectionVariables.set(\"adminToken\", pm.response.json().data.token);",
+                  "pm.environment.set(\"adminToken\", pm.response.json().data.token);",
                   "pm.test(\"管理员角色为 ADMIN\", function () {",
                   "    pm.expect(pm.response.json().data.user.role).to.eql(\"ADMIN\");",
                   "});"
@@ -86,6 +87,7 @@
                   "    pm.expect(j.data.user.password).to.be.null;",
                   "});",
                   "pm.collectionVariables.set(\"mediaToken\", pm.response.json().data.token);",
+                  "pm.environment.set(\"mediaToken\", pm.response.json().data.token);",
                   "pm.test(\"自媒体角色为 MEDIA\", function () {",
                   "    pm.expect(pm.response.json().data.user.role).to.eql(\"MEDIA\");",
                   "});"
@@ -144,6 +146,7 @@
                   "    pm.expect(j.data.user.password).to.be.null;",
                   "});",
                   "pm.collectionVariables.set(\"userToken\", pm.response.json().data.token);",
+                  "pm.environment.set(\"userToken\", pm.response.json().data.token);",
                   "pm.test(\"普通用户角色为 USER\", function () {",
                   "    pm.expect(pm.response.json().data.user.role).to.eql(\"USER\");",
                   "});"
@@ -403,7 +406,7 @@
                   "pm.test(\"列表中的文章均为已发布 status=2\", function () {",
                   "    d.records.forEach(function (a) { pm.expect(a.status).to.eql(2); });",
                   "});",
-                  "if (d.records.length > 0) { pm.collectionVariables.set(\"articleId\", d.records[0].id); }"
+                  "if (d.records.length > 0) { pm.collectionVariables.set(\"articleId\", d.records[0].id); pm.environment.set(\"articleId\", d.records[0].id); }"
                 ]
               }
             }
@@ -945,10 +948,10 @@
                   "    pm.expect(j).to.have.property(\"data\");",
                   "});",
                   "pm.test(\"只返回 status=1 的话题\", function () {",
-                  "    pm.response.json().data.forEach(function (x) { pm.expect(x.status).to.eql(1); });",
+                  "    pm.response.json().data.records.forEach(function (x) { pm.expect(x.status).to.eql(1); });",
                   "});",
                   "var d = pm.response.json().data;",
-                  "if (d.length > 0) { pm.collectionVariables.set(\"topicId\", d[0].id); }"
+                  "if (d.length > 0) { pm.collectionVariables.set(\"topicId\", d[0].id); pm.environment.set(\"topicId\", d[0].id); }"
                 ]
               }
             }
@@ -1254,12 +1257,10 @@
                   "});",
                   "var d = pm.response.json().data;",
                   "pm.test(\"新建成功并返回草稿 id\", function () {",
-                  "    pm.expect(d.id).to.be.a(\"number\");",
+                  "    pm.expect(d).to.be.a(\"number\");",
                   "});",
-                  "pm.test(\"草稿状态为 0\", function () {",
-                  "    pm.expect(d.status).to.eql(0);",
-                  "});",
-                  "pm.collectionVariables.set(\"draftId\", d.id);"
+                  "pm.collectionVariables.set(\"draftId\", d);",
+                  "pm.environment.set(\"draftId\", d);"
                 ]
               }
             }
@@ -1382,7 +1383,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"title\":\"越权绑话题\",\"summary\":\"x\",\"content\":\"x\",\"channelId\":1,\"topicId\":5}",
+              "raw": "{\"title\":\"越权绑话题\",\"summary\":\"x\",\"content\":\"x\",\"channelId\":1,\"topicId\":6}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1491,6 +1492,106 @@
                 "media",
                 "articles",
                 "{{draftId}}",
+                "submit"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "新建草稿（驳回流程）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var d = pm.response.json().data;",
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"新建成功并返回草稿 id\", function () {",
+                  "    pm.expect(d).to.be.a(\"number\");",
+                  "});",
+                  "pm.collectionVariables.set(\"rejectDraftId\", d);",
+                  "pm.environment.set(\"rejectDraftId\", d);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mediaToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Postman 驳回流程稿件\",\"summary\":\"用于验证驳回\",\"content\":\"<p>正文内容</p>\",\"channelId\":1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/media/articles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "media",
+                "articles"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "提交审核（驳回流程）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"提交后业务码 200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg\", function () {",
+                  "    pm.expect(pm.response.json()).to.have.property(\"msg\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mediaToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/media/articles/{{rejectDraftId}}/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "media",
+                "articles",
+                "{{rejectDraftId}}",
                 "submit"
               ],
               "query": []
@@ -1765,7 +1866,7 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/admin/articles/{{draftId}}/reject",
+              "raw": "{{baseUrl}}/api/admin/articles/{{rejectDraftId}}/reject",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1773,7 +1874,7 @@
                 "api",
                 "admin",
                 "articles",
-                "{{draftId}}",
+                "{{rejectDraftId}}",
                 "reject"
               ],
               "query": []
@@ -1819,7 +1920,7 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/admin/articles/{{draftId}}/reject",
+              "raw": "{{baseUrl}}/api/admin/articles/{{rejectDraftId}}/reject",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1827,7 +1928,7 @@
                 "api",
                 "admin",
                 "articles",
-                "{{draftId}}",
+                "{{rejectDraftId}}",
                 "reject"
               ],
               "query": []
@@ -2055,7 +2156,7 @@
           }
         },
         {
-          "name": "话题审核通过",
+          "name": "话题上线／禁用（幂等）",
           "event": [
             {
               "listen": "test",
@@ -2065,26 +2166,27 @@
                   "pm.test(\"业务码 code=200\", function () {",
                   "    pm.expect(pm.response.json().code).to.eql(200);",
                   "});",
-                  "pm.test(\"返回体包含 code / msg / data\", function () {",
-                  "    var j = pm.response.json();",
-                  "    pm.expect(j).to.have.property(\"code\");",
-                  "    pm.expect(j).to.have.property(\"msg\");",
-                  "    pm.expect(j).to.have.property(\"data\");",
+                  "pm.test(\"返回操作结果\", function () {",
+                  "    pm.expect(pm.response.json().data).to.be.a(\"string\");",
                   "});"
                 ]
               }
             }
           ],
           "request": {
-            "method": "POST",
+            "method": "PUT",
             "header": [
               {
                 "key": "Authorization",
                 "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/admin/topics/5/approve",
+              "raw": "{{baseUrl}}/api/admin/topics/1/status",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2092,12 +2194,21 @@
                 "api",
                 "admin",
                 "topics",
-                "5",
-                "approve"
+                "1",
+                "status"
               ],
               "query": []
             },
-            "description": ""
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\":1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
           }
         }
       ]

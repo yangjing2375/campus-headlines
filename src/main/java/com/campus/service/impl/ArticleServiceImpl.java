@@ -39,6 +39,9 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createDraft(Article article) {
+        if (article.getTitle() == null || article.getTitle().trim().isEmpty()) {
+            throw new IllegalArgumentException("标题不能为空");
+        }
         validateTopic(article.getTopicId());
         article.setStatus(0); // 草稿
         if (article.getContent() == null) article.setContent("");
@@ -120,6 +123,9 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean reject(Long id, Long auditorId, String reason) {
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new IllegalArgumentException("驳回时必须填写驳回理由");
+        }
         Article exist = articleMapper.selectById(id);
         if (exist == null) throw new IllegalArgumentException("文章不存在");
         if (exist.getStatus() != 1) throw new IllegalArgumentException("仅待审核文章可驳回");
