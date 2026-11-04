@@ -1,0 +1,2136 @@
+{
+  "info": {
+    "_postman_id": "de2537b3-5528-414a-a239-4a7d6c6e3818",
+    "name": "校园头条 Campus Headlines · 接口测试集合",
+    "description": "覆盖 认证 / 用户端 / 自媒体端 / 管理端 4 类共 44 个请求，登录请求自动把 Token 写入 collectionVariables；异常用例覆盖 BUG-01（越权访问）、BUG-02（分页越界）、BUG-03（频道删除）回归。\n\n运行方式：先执行 01 认证 三个登录请求，再按目录顺序运行（或直接 Collection Runner 顺序执行）。",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 认证（登录后自动注入 Token）",
+      "item": [
+        {
+          "name": "登录-管理员 admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var j = pm.response.json();",
+                  "pm.test(\"HTTP 200 且业务码 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(j.code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回 JWT 令牌与用户信息\", function () {",
+                  "    pm.expect(j.data.token).to.be.a(\"string\").and.not.empty;",
+                  "    pm.expect(j.data.user.username).to.eql(pm.request.body ? JSON.parse(pm.request.body.raw).username : j.data.user.username);",
+                  "    pm.expect(j.data.user.password).to.be.null;",
+                  "});",
+                  "pm.collectionVariables.set(\"adminToken\", pm.response.json().data.token);",
+                  "pm.test(\"管理员角色为 ADMIN\", function () {",
+                  "    pm.expect(pm.response.json().data.user.role).to.eql(\"ADMIN\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"admin\",\"password\":\"123456\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "登录-自媒体 editor01",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var j = pm.response.json();",
+                  "pm.test(\"HTTP 200 且业务码 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(j.code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回 JWT 令牌与用户信息\", function () {",
+                  "    pm.expect(j.data.token).to.be.a(\"string\").and.not.empty;",
+                  "    pm.expect(j.data.user.username).to.eql(pm.request.body ? JSON.parse(pm.request.body.raw).username : j.data.user.username);",
+                  "    pm.expect(j.data.user.password).to.be.null;",
+                  "});",
+                  "pm.collectionVariables.set(\"mediaToken\", pm.response.json().data.token);",
+                  "pm.test(\"自媒体角色为 MEDIA\", function () {",
+                  "    pm.expect(pm.response.json().data.user.role).to.eql(\"MEDIA\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"editor01\",\"password\":\"123456\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "登录-普通用户 2023001",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var j = pm.response.json();",
+                  "pm.test(\"HTTP 200 且业务码 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(j.code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回 JWT 令牌与用户信息\", function () {",
+                  "    pm.expect(j.data.token).to.be.a(\"string\").and.not.empty;",
+                  "    pm.expect(j.data.user.username).to.eql(pm.request.body ? JSON.parse(pm.request.body.raw).username : j.data.user.username);",
+                  "    pm.expect(j.data.user.password).to.be.null;",
+                  "});",
+                  "pm.collectionVariables.set(\"userToken\", pm.response.json().data.token);",
+                  "pm.test(\"普通用户角色为 USER\", function () {",
+                  "    pm.expect(pm.response.json().data.user.role).to.eql(\"USER\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"2023001\",\"password\":\"123456\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "异常-密码错误",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var j = pm.response.json();",
+                  "pm.test(\"业务码 401，提示用户名或密码错误\", function () {",
+                  "    pm.expect(j.code).to.eql(401);",
+                  "    pm.expect(j.msg).to.include(\"用户名或密码错误\");",
+                  "    pm.expect(j.data).to.be.null;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"admin\",\"password\":\"1234567\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "异常-用户名不存在",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var j = pm.response.json();",
+                  "pm.test(\"业务码 401 且不暴露账号是否存在\", function () {",
+                  "    pm.expect(j.code).to.eql(401);",
+                  "    pm.expect(j.msg).to.include(\"用户名或密码错误\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"notexist\",\"password\":\"123456\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "获取当前用户信息",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});",
+                  "pm.test(\"返回用户字段并隐藏密码\", function () {",
+                  "    pm.expect(pm.response.json().data.password).to.be.null;",
+                  "    pm.expect(pm.response.json().data.username).to.eql(\"admin\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/userinfo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "userinfo"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 用户端（游客可浏览 / 互动需登录）",
+      "item": [
+        {
+          "name": "频道列表",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});",
+                  "pm.test(\"返回 8 个启用频道\", function () {",
+                  "    pm.expect(pm.response.json().data.length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/channels",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "channels"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "文章列表（分页）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});",
+                  "var d = pm.response.json().data;",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "    pm.expect(d).to.have.property(\"records\");",
+                  "    pm.expect(d).to.have.property(\"total\");",
+                  "    pm.expect(d.records.length).to.be.at.most(10);",
+                  "});",
+                  "pm.test(\"列表中的文章均为已发布 status=2\", function () {",
+                  "    d.records.forEach(function (a) { pm.expect(a.status).to.eql(2); });",
+                  "});",
+                  "if (d.records.length > 0) { pm.collectionVariables.set(\"articleId\", d.records[0].id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/articles?current=1&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "articles?current=1&size=10"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "文章列表-按频道筛选",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});",
+                  "pm.test(\"所有记录 channelId=1\", function () {",
+                  "    pm.response.json().data.records.forEach(function (a) { pm.expect(a.channelId).to.eql(1); });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/articles?current=1&size=10&channelId=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "articles?current=1&size=10&channelId=1"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "文章列表-关键词搜索",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});",
+                  "pm.test(\"命中结果非空\", function () {",
+                  "    pm.expect(pm.response.json().data.total).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/articles?keyword=讲座",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "articles?keyword=讲座"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "文章详情（阅读量+1）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});",
+                  "var d = pm.response.json().data;",
+                  "pm.test(\"详情包含标题/正文/作者\", function () {",
+                  "    pm.expect(d.title).to.be.a(\"string\").and.not.empty;",
+                  "    pm.expect(d.content).to.be.a(\"string\");",
+                  "});",
+                  "pm.test(\"阅读量字段存在\", function () {",
+                  "    pm.expect(d).to.have.property(\"viewCount\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/articles/{{articleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "articles",
+                "{{articleId}}"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "异常-未发布文章不可访问（BUG-01 回归）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"不存在或未发布返回 404 业务码\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(404);",
+                  "    pm.expect(pm.response.json().msg).to.include(\"文章不存在或已下线\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/articles/9999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "articles",
+                "9999"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "异常-分页参数越界被归一化（BUG-02 回归）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var d = pm.response.json().data;",
+                  "pm.test(\"不返回 500，当前页归一为 1\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "    pm.expect(d.current).to.eql(1);",
+                  "});",
+                  "pm.test(\"单页条数被限制在 50 以内\", function () {",
+                  "    pm.expect(d.size).to.be.at.most(50);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/articles?current=-1&size=100000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "articles?current=-1&size=100000"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "点赞 / 取消点赞",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});",
+                  "var d = pm.response.json().data;",
+                  "pm.test(\"返回 liked 布尔值\", function () {",
+                  "    pm.expect(d).to.have.property(\"liked\");",
+                  "    pm.expect(d.liked).to.be.a(\"boolean\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/articles/{{articleId}}/like",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "articles",
+                "{{articleId}}",
+                "like"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "异常-未登录点赞返回 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 401 且提示请先登录\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(401);",
+                  "    pm.expect(pm.response.json().msg).to.include(\"请先登录\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/articles/{{articleId}}/like",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "articles",
+                "{{articleId}}",
+                "like"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "收藏 / 取消收藏",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});",
+                  "pm.test(\"返回 favorited 布尔值\", function () {",
+                  "    pm.expect(pm.response.json().data).to.have.property(\"favorited\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/articles/{{articleId}}/favorite",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "articles",
+                "{{articleId}}",
+                "favorite"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "评论列表",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});",
+                  "pm.test(\"data 为数组\", function () {",
+                  "    pm.expect(pm.response.json().data).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/articles/{{articleId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "articles",
+                "{{articleId}}",
+                "comments"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "发表评论",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});",
+                  "pm.test(\"返回新评论 id\", function () {",
+                  "    pm.expect(pm.response.json().data.id).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"content\":\"Postman 接口测试评论\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user/articles/{{articleId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "articles",
+                "{{articleId}}",
+                "comments"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "异常-评论内容为空",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 400 且提示不能为空\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(400);",
+                  "    pm.expect(pm.response.json().msg).to.include(\"不能为空\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"content\":\"\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user/articles/{{articleId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "articles",
+                "{{articleId}}",
+                "comments"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "话题广场（仅已上线）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});",
+                  "pm.test(\"只返回 status=1 的话题\", function () {",
+                  "    pm.response.json().data.forEach(function (x) { pm.expect(x.status).to.eql(1); });",
+                  "});",
+                  "var d = pm.response.json().data;",
+                  "if (d.length > 0) { pm.collectionVariables.set(\"topicId\", d[0].id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/topics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "topics"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "热门话题",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});",
+                  "pm.test(\"isHot 均为 1\", function () {",
+                  "    pm.response.json().data.forEach(function (x) { pm.expect(x.isHot).to.eql(1); });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/topics/hot",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "topics",
+                "hot"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "话题详情（文章数/关注数）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});",
+                  "pm.test(\"统计字段存在且非负\", function () {",
+                  "    var d = pm.response.json().data;",
+                  "    pm.expect(d.articleCount).to.be.at.least(0);",
+                  "    pm.expect(d.followerCount).to.be.at.least(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/topics/{{topicId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "topics",
+                "{{topicId}}"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "关注 / 取消关注话题",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});",
+                  "pm.test(\"返回 followed 布尔值\", function () {",
+                  "    pm.expect(pm.response.json().data).to.have.property(\"followed\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/topics/{{topicId}}/follow",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "topics",
+                "{{topicId}}",
+                "follow"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 自媒体端（需 MEDIA Token）",
+      "item": [
+        {
+          "name": "异常-无 Token 访问被拦截",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 401\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/media/articles/mine",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "media",
+                "articles",
+                "mine"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "异常-普通用户越权访问自媒体接口",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 403，角色隔离生效\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(403);",
+                  "    pm.expect(pm.response.json().msg).to.include(\"无权访问\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/media/articles/mine",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "media",
+                "articles",
+                "mine"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "我的稿件列表",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});",
+                  "pm.test(\"分页结构完整\", function () {",
+                  "    pm.expect(pm.response.json().data).to.have.property(\"records\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mediaToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/media/articles/mine?current=1&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "media",
+                "articles",
+                "mine?current=1&size=10"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "新建草稿",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});",
+                  "var d = pm.response.json().data;",
+                  "pm.test(\"新建成功并返回草稿 id\", function () {",
+                  "    pm.expect(d.id).to.be.a(\"number\");",
+                  "});",
+                  "pm.test(\"草稿状态为 0\", function () {",
+                  "    pm.expect(d.status).to.eql(0);",
+                  "});",
+                  "pm.collectionVariables.set(\"draftId\", d.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mediaToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Postman 自动化稿件\",\"summary\":\"接口测试创建的稿件\",\"content\":\"<p>正文内容</p>\",\"channelId\":1,\"topicId\":{{topicId}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/media/articles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "media",
+                "articles"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "异常-标题为空",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 400 且提示标题\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(400);",
+                  "    pm.expect(pm.response.json().msg).to.include(\"标题\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mediaToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"\",\"summary\":\"x\",\"content\":\"x\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/media/articles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "media",
+                "articles"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "异常-绑定未上线话题",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 400 且提示话题未上线\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(400);",
+                  "    pm.expect(pm.response.json().msg).to.include(\"话题\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mediaToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"越权绑话题\",\"summary\":\"x\",\"content\":\"x\",\"channelId\":1,\"topicId\":5}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/media/articles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "media",
+                "articles"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "稿件详情",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});",
+                  "pm.test(\"返回本人稿件\", function () {",
+                  "    pm.expect(pm.response.json().data.id).to.eql(Number(pm.collectionVariables.get(\"draftId\")));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mediaToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/media/articles/{{draftId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "media",
+                "articles",
+                "{{draftId}}"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "提交审核",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mediaToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/media/articles/{{draftId}}/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "media",
+                "articles",
+                "{{draftId}}",
+                "submit"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "可选的已上线话题（写稿下拉）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mediaToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/media/topics/online",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "media",
+                "topics",
+                "online"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "我的素材",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mediaToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/media/materials",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "media",
+                "materials"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 管理端（需 ADMIN Token）",
+      "item": [
+        {
+          "name": "异常-自媒体 Token 访问管理接口",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 403\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mediaToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/articles/pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "articles",
+                "pending"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "待审核稿件列表",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/articles/pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "articles",
+                "pending"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "审核通过（草稿 → 已发布）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/articles/{{draftId}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "articles",
+                "{{draftId}}",
+                "approve"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "驳回稿件需填写理由",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reason\":\"接口测试：内容与栏目不符\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/articles/{{draftId}}/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "articles",
+                "{{draftId}}",
+                "reject"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "异常-驳回不填理由",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 400 且提示理由\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(400);",
+                  "    pm.expect(pm.response.json().msg).to.include(\"理由\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"reason\":\"\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/articles/{{draftId}}/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "articles",
+                "{{draftId}}",
+                "reject"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "频道列表",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/channels",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "channels"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "异常-删除被引用频道（BUG-03 回归）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 400，提示频道下仍有文章\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(400);",
+                  "    pm.expect(pm.response.json().msg).to.include(\"无法删除\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/channels/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "channels",
+                "1"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "用户列表",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "看板统计",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});",
+                  "pm.test(\"统计字段存在\", function () {",
+                  "    pm.expect(pm.response.json().data).to.be.an(\"object\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/statistics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "statistics"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "话题管理列表",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/topics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "topics"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "话题审核通过",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"业务码 code=200\", function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(200);",
+                  "});",
+                  "pm.test(\"返回体包含 code / msg / data\", function () {",
+                  "    var j = pm.response.json();",
+                  "    pm.expect(j).to.have.property(\"code\");",
+                  "    pm.expect(j).to.have.property(\"msg\");",
+                  "    pm.expect(j).to.have.property(\"data\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/topics/5/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "topics",
+                "5",
+                "approve"
+              ],
+              "query": []
+            },
+            "description": ""
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081/campus-headlines"
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "mediaToken",
+      "value": ""
+    },
+    {
+      "key": "userToken",
+      "value": ""
+    },
+    {
+      "key": "articleId",
+      "value": "1"
+    },
+    {
+      "key": "topicId",
+      "value": "1"
+    },
+    {
+      "key": "draftId",
+      "value": ""
+    }
+  ]
+}
